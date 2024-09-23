@@ -1,27 +1,18 @@
 #!/bin/bash
 
-# Function to display usage instructions
-usage() {
+if [ "$#" -lt 1 ]; then
   echo "Usage: $0 <logfile1.tgz> <logfile2.tgz> ..."
   exit 1
-}
+fi
 
-# Function to clean up temporary directory on exit
 cleanup() {
   echo "Cleaning up..."
   rm -rf "$TEMP_DIR"
 }
 
-# Check if at least one argument is passed
-if [ "$#" -lt 1 ]; then
-  usage
-fi
-
-# Create temporary directory and set trap to clean up on exit
 TEMP_DIR=$(mktemp -dp .)
 trap cleanup EXIT
 
-# Function to extract logs for a machine
 extract_logs() {
   local LOG_ARCHIVE="$1"
   local MACHINE="$2"
@@ -36,7 +27,6 @@ extract_logs() {
   fi
 }
 
-# Function to process logs for a machine
 process_logs() {
   local MACHINE_LOGS="$1"
   
@@ -48,7 +38,6 @@ process_logs() {
   fi
 }
 
-# Function to generate the username distribution
 generate_username_dist() {
   if bin/create_username_dist.sh "$TEMP_DIR"; then
     echo "Username distribution generated."
@@ -58,7 +47,6 @@ generate_username_dist() {
   fi
 }
 
-# Function to generate the hours distribution
 generate_hours_dist() {
   if bin/create_hours_dist.sh "$TEMP_DIR"; then
     echo "Hours distribution generated."
@@ -68,7 +56,6 @@ generate_hours_dist() {
   fi
 }
 
-# Function to generate the country distribution
 generate_country_dist() {
   if bin/create_country_dist.sh "$TEMP_DIR"; then
     echo "Country distribution generated."
@@ -78,7 +65,6 @@ generate_country_dist() {
   fi
 }
 
-# Function to assemble the final report
 assemble_report() {
   if bin/assemble_report.sh "$TEMP_DIR"; then
     echo "Final report assembled."
@@ -88,7 +74,6 @@ assemble_report() {
   fi
 }
 
-# Process each log archive provided on the command line
 for LOG_ARCHIVE in "$@"; do
   MACHINE=$(basename "$LOG_ARCHIVE" _secure.tgz)
 
@@ -96,13 +81,11 @@ for LOG_ARCHIVE in "$@"; do
   process_logs "$TEMP_DIR/$MACHINE" || exit 1
 done
 
-# Generate the distributions and the final report
 generate_username_dist || exit 1
 generate_hours_dist || exit 1
 generate_country_dist || exit 1
 assemble_report || exit 1
 
-# Move the final report to the current directory
 if mv "$TEMP_DIR/failed_login_summary.html" .; then
   echo "Report generated: failed_login_summary.html"
 else
