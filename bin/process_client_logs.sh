@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "$1"
+cd "$1" || exit
 
 find . -type f -exec file --mime {} + | grep 'charset=binary' -v | cut -d: -f1 | \
 xargs cat | iconv -f UTF-8 -t UTF-8 -c | awk '
